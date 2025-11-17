@@ -134,7 +134,7 @@ function EditProfile() {
 
             updateProfile({
               variables: {
-                _id: user._id, // GraphQL expects _id
+                id: user._id, // GraphQL expects _id
                 input: values,
               },
             });
