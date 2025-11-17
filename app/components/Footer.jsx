@@ -70,14 +70,14 @@ export default function Footer() {
                   <Image
                     src="/payments/visa.png"
                     alt="Visa"
-                    width={25}
-                    height={25}
+                    width={24}
+                    height={24}
                   />
                   <Image
                     src="/payments/card.png"
                     alt="Mastercard"
-                    width={20}
-                    height={25}
+                    width={24}
+                    height={24}
                   />
                 </Box>
               </Stack>
