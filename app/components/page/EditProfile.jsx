@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -26,27 +26,32 @@ export default function EditProfile() {
   const [alert, setAlert] = useState({ open: false, message: "", type: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
-    onCompleted: (data) => {
-      if (data?.updateUser?.isSuccess) {
+    onCompleted: ({ updateUser }) => {
+      if (updateUser?.isSuccess) {
         setUser({ ...user, ...formikValues });
         setAlert({
           open: true,
+          message: updateUser.messageEn || "Profile updated successfully!",
           type: "success",
-          message: data.updateUser.messageEn || "Profile updated successfully!",
         });
       } else {
         setAlert({
           open: true,
+          message: updateUser.messageEn || "Failed to update profile.",
           type: "error",
-          message: data.updateUser.messageEn || "Failed to update profile.",
         });
       }
     },
     onError: (err) => {
-      console.error(err);
-      setAlert({ open: true, type: "error", message: err.message });
+      setAlert({ open: true, message: err.message, type: "error" });
     },
   });
+
+  const initialValues = {
+    username: user?.username || "",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
+  };
 
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
@@ -54,13 +59,8 @@ export default function EditProfile() {
     phoneNumber: Yup.string(),
   });
 
-  const [formikValues, setFormikValues] = useState({
-    username: "",
-    email: "",
-    phoneNumber: "",
-  });
+  const [formikValues, setFormikValues] = useState(initialValues);
 
-  // Populate form when user loads
   useEffect(() => {
     if (user) {
       setFormikValues({
@@ -72,12 +72,11 @@ export default function EditProfile() {
     }
   }, [user]);
 
-  // Handle avatar upload preview
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
-    // TODO: upload avatar if needed
+    // Optionally convert to base64 if your backend accepts it
   };
 
   if (!user) {
@@ -109,7 +108,12 @@ export default function EditProfile() {
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
           <Button component="label" variant="outlined">
             Change Avatar
-            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleAvatarUpload}
+            />
           </Button>
         </Stack>
 
@@ -118,15 +122,15 @@ export default function EditProfile() {
           initialValues={formikValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
-            if (!user._id) {
-              setAlert({ open: true, type: "error", message: "User ID is missing!" });
+            if (!user?._id) {
+              setAlert({ open: true, message: "User ID is missing!", type: "error" });
               return;
             }
-            setFormikValues(values);
+
             updateProfile({
               variables: {
-                id: user._id, // GraphQL variable
-                input: values, // must match mutation's input object
+                id: user._id, // matches $id in mutation
+                input: { ...values }, // matches $input
               },
             });
           }}
@@ -138,7 +142,10 @@ export default function EditProfile() {
                 label="Username"
                 name="username"
                 value={values.username}
-                onChange={handleChange}
+                onChange={(e) => {
+                  handleChange(e);
+                  setFormikValues({ ...values, username: e.target.value });
+                }}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.username && Boolean(errors.username)}
@@ -151,7 +158,10 @@ export default function EditProfile() {
                 name="email"
                 type="email"
                 value={values.email}
-                onChange={handleChange}
+                onChange={(e) => {
+                  handleChange(e);
+                  setFormikValues({ ...values, email: e.target.value });
+                }}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.email && Boolean(errors.email)}
@@ -163,7 +173,10 @@ export default function EditProfile() {
                 label="Phone Number"
                 name="phoneNumber"
                 value={values.phoneNumber}
-                onChange={handleChange}
+                onChange={(e) => {
+                  handleChange(e);
+                  setFormikValues({ ...values, phoneNumber: e.target.value });
+                }}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.phoneNumber && Boolean(errors.phoneNumber)}
