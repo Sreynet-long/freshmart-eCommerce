@@ -432,9 +432,9 @@ export default function TopNavbar({ onSearch }) {
             },
           }}
         >
-          <IconButton onClick={() => setMobileSearchOpen(false)}>
+          {/* <IconButton onClick={() => setMobileSearchOpen(false)}>
             <MenuIcon />
-          </IconButton>
+          </IconButton> */}
 
           {/* <TextField
             select
