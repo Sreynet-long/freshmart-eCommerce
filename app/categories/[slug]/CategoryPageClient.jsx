@@ -178,7 +178,7 @@ export default function CategoryPageClient({ slug }) {
                     {product.desc}
                   </Typography>
 
-                  <Typography variant="h6" mt={1} color="success.main">
+                  <Typography fontSize="16px" variant="h6" mt={1} color="success.main">
                     ${product.price?.toFixed(2) ?? "0.00"}
                   </Typography>
                 </CardContent>
