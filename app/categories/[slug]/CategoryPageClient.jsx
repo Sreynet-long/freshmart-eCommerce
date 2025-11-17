@@ -129,16 +129,15 @@ export default function CategoryPageClient({ slug }) {
             <Grid key={product.id} item xs={6} sm={6} md={3} lg={2.4}>
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 2,
                   boxShadow: 2,
                   overflow: "hidden",
-                  height: "100%",
                   transition: "0.25s",
                   display: "flex",
                   flexDirection: "column",
                   "&:hover": {
                     boxShadow: 4,
-                    transform: "translateY(-4px)",
+                    
                   },
                   p: 1,
                   height: 300,
@@ -158,7 +157,7 @@ export default function CategoryPageClient({ slug }) {
                   }}
                 />
 
-                <CardContent sx={{ flexGrow: 1 }}>
+                <CardContent sx={{p: 1, textAlign: "justify", flexGrow: 1 }}>
                   <Typography variant="subtitle1" fontWeight="bold" noWrap>
                     {product.productName}
                   </Typography>
@@ -167,12 +166,10 @@ export default function CategoryPageClient({ slug }) {
                     variant="body2"
                     color="text.secondary"
                     sx={{
-                      height: 36,
                       overflow: "hidden",
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
-                      mt: 0.5,
                     }}
                   >
                     {product.desc}
@@ -188,8 +185,9 @@ export default function CategoryPageClient({ slug }) {
                     variant="contained"
                     fullWidth
                     color="success"
+                    size="small"
                     onClick={() => addToCart(product)}
-                    sx={{ borderRadius: 20, textTransform: "none" }}
+                    sx={{ borderRadius: 20, textTransform: "none", mt: 1 }}
                   >
                     🛒 Add to Cart
                   </Button>
