@@ -33,8 +33,8 @@ const categoryMap = {
 
 export default function CategoryPageClient({ slug }) {
   const { addToCart } = useCart();
-
   const categoryEnum = categoryMap[slug];
+
   const displayName = slug
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -69,9 +69,9 @@ export default function CategoryPageClient({ slug }) {
     : [];
 
   return (
-    <Box sx={{ py: 4 }}>
+    <Box sx={{ py: 3, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Breadcrumb */}
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 1 }}>
         <Link href="/" style={{ textDecoration: "none", color: "#1976d2" }}>
           Home
         </Link>
@@ -89,41 +89,35 @@ export default function CategoryPageClient({ slug }) {
       </Typography>
 
       {/* Product Grid */}
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "repeat(2, 1fr)",
-            sm: "repeat(3, 1fr)",
-            md: "repeat(4, 1fr)",
-            lg: "repeat(5, 1fr)",
-          },
-          gap: 2,
-        }}
-      >
+      <Grid container spacing={2}>
         {/* Loading Skeleton */}
         {loading &&
-          Array.from(new Array(10)).map((_, i) => (
-            <Skeleton
-              key={i}
-              variant="rectangular"
-              height={220}
-              sx={{ borderRadius: 2 }}
-            />
+          Array.from({ length: 10 }).map((_, i) => (
+            <Grid key={i} item xs={6} sm={4} md={3} lg={2.4}>
+              <Skeleton
+                variant="rectangular"
+                height={250}
+                sx={{ borderRadius: 3 }}
+              />
+            </Grid>
           ))}
 
         {/* Error */}
         {error && (
-          <Typography color="error" sx={{ gridColumn: "1/-1" }}>
+          <Typography
+            color="error"
+            sx={{ gridColumn: "1/-1", width: "100%", textAlign: "center" }}
+          >
             {error.message}
           </Typography>
         )}
 
         {/* No Products */}
         {!loading && !error && products.length === 0 && (
-          <Typography sx={{ gridColumn: "1/-1" }}>
+          <Typography
+            sx={{ width: "100%", textAlign: "center", py: 4 }}
+            color="text.secondary"
+          >
             No products found in this category.
           </Typography>
         )}
@@ -132,73 +126,77 @@ export default function CategoryPageClient({ slug }) {
         {!loading &&
           !error &&
           products.map((product) => (
-            <Card
-              key={product.id}
-              sx={{
-                borderRadius: 3,
-                boxShadow: 2,
-                overflow: "hidden",
-                transition: "0.25s",
-                "&:hover": { boxShadow: 4, transform: "scale(1.02)" },
-                display: "flex",
-                flexDirection: "column",
-                p: 1,
-                height: 300,
-                width: 170,
-              }}
-            >
-              <CardMedia
-                component="img"
-                image={product.imageUrl}
-                alt={product.productName}
+            <Grid key={product.id} item xs={6} sm={4} md={3} lg={2.4}>
+              <Card
                 sx={{
-                  // height: 150,
-                  objectFit: "contain",
-                  p: 1,
+                  borderRadius: 3,
+                  boxShadow: 2,
+                  overflow: "hidden",
+                  height: "100%",
+                  transition: "0.25s",
+                  display: "flex",
+                  flexDirection: "column",
+                  "&:hover": {
+                    boxShadow: 4,
+                    transform: "translateY(-4px)",
+                  },
                 }}
-              />
-
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                  {product.productName}
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
+              >
+                <CardMedia
+                  component="img"
+                  image={product.imageUrl}
+                  alt={product.productName}
                   sx={{
-                    height: 38,
-                    overflow: "hidden",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
+                    height: 160,
+                    objectFit: "contain",
+                    backgroundColor: "#fafafa",
+                    p: 1,
                   }}
-                >
-                  {product.desc}
-                </Typography>
+                />
 
-                <Typography variant="h6" mt={1}>
-                  ${product.price?.toFixed(2) ?? "0.00"}
-                </Typography>
-              </CardContent>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                    {product.productName}
+                  </Typography>
 
-              <Box sx={{ p: 1 }}>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  color="success"
-                  onClick={() => addToCart(product)}
-                  sx={{ borderRadius: 20, textTransform: "none" }}
-                >
-                  🛒 Add to Cart
-                </Button>
-              </Box>
-            </Card>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      height: 36,
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      mt: 0.5,
+                    }}
+                  >
+                    {product.desc}
+                  </Typography>
+
+                  <Typography variant="h6" mt={1} color="success.main">
+                    ${product.price?.toFixed(2) ?? "0.00"}
+                  </Typography>
+                </CardContent>
+
+                <Box sx={{ p: 1 }}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    color="success"
+                    onClick={() => addToCart(product)}
+                    sx={{ borderRadius: 20, textTransform: "none" }}
+                  >
+                    🛒 Add to Cart
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
           ))}
       </Grid>
 
-      {/* Bottom Section */}
-      <Stack sx={{ mt: 5 }}>
+      {/* Bottom Feature Section */}
+      <Stack sx={{ mt: 6 }}>
         <WhyShopWithUs />
       </Stack>
     </Box>
