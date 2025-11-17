@@ -36,6 +36,8 @@ function EditProfile() {
   // Load user data into form
   useEffect(() => {
     if (user) {
+      console.log("User object:", user);
+
       setFormValues({
         username: user.username || "",
         email: user.email || "",
@@ -97,6 +99,7 @@ function EditProfile() {
 
   const handleSubmit = (values) => {
     const userId = user?._id || user?.id;
+    console.log("Submitting userId =", userId);
 
     if (!userId) {
       setFeedback({ type: "error", message: "User ID missing!" });
@@ -104,6 +107,14 @@ function EditProfile() {
     }
 
     setFormValues(values);
+    console.log("Sending variables:", {
+  id: userId,
+  input: {
+    username: values.username,
+    email: values.email,
+    phoneNumber: values.phoneNumber,
+  },
+});
 
     updateProfile({
       variables: {
