@@ -24,13 +24,15 @@ function EditProfile() {
   const [avatarPreview, setAvatarPreview] = useState("");
   const firstFieldRef = useRef(null);
 
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: ({ updateUser }) => {
       if (updateUser?.isSuccess) {
         setUser({ ...user, ...formValues });
         setFeedback({ type: "success", message: updateUser.messageEn || "Profile updated successfully!" });
       } else {
-        setFeedback({ type: "error", message: updateUser?.messageEn || "Failed to update profile." });
+        setFeedback({ type: "error", message: updateUser?.messageEn || "Update failed" });
       }
     },
     onError: (err) => {
@@ -38,14 +40,13 @@ function EditProfile() {
     },
   });
 
-  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [formValues, setFormValues] = useState({
     username: "",
     email: "",
     phoneNumber: "",
   });
 
-  // populate form
+  // Populate form on load
   useEffect(() => {
     if (user) {
       setFormValues({
@@ -58,32 +59,39 @@ function EditProfile() {
     }
   }, [user]);
 
-  // Avatar upload preview
+  // Avatar preview
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  // Form validation schema
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneNumber: Yup.string(),
   });
 
+  // Form submission
   const handleSubmit = (values) => {
     const userId = user?._id || user?.id;
-
     if (!userId) {
       setFeedback({ type: "error", message: "User ID is missing!" });
       return;
     }
 
-    setFeedback({ type: "", message: "" });
     setFormValues(values);
+    setFeedback({ type: "", message: "" });
 
-    updateProfile({ variables: { id: userId, input: values } });
+    // ✅ Flat variables instead of input object
+    updateProfile({
+      variables: {
+        id: userId,
+        username: values.username,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+      },
+    });
   };
 
   if (!user) {
@@ -97,7 +105,9 @@ function EditProfile() {
   return (
     <Box p={3} display="flex" justifyContent="center">
       <Paper sx={{ p: 4, maxWidth: 500, width: "100%", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight="bold" mb={3}>Edit Profile</Typography>
+        <Typography variant="h5" fontWeight="bold" mb={3}>
+          Edit Profile
+        </Typography>
 
         <Stack alignItems="center" mb={2}>
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
