@@ -18,6 +18,7 @@ import { useMutation } from "@apollo/client/react";
 import { UPDATE_USER } from "../../schema/User";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import Link from "next/link";
 
 function EditProfile() {
   const { user, setUser } = useAuth();
