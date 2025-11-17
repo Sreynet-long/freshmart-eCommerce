@@ -26,10 +26,11 @@ function EditProfile() {
   const [alert, setAlert] = useState({ open: false, message: "", type: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
-    onCompleted: (data) => {
+    onCompleted: (data, { variables }) => {
       const res = data?.updateUser;
       if (res?.isSuccess) {
-        setUser({ ...user, ...formikValues });
+        // Update auth context with new values
+        setUser({ ...user, ...variables.input });
         setAlert({
           open: true,
           message: res.messageEn || "Profile updated successfully!",
@@ -48,7 +49,6 @@ function EditProfile() {
     },
   });
 
-  // Formik initial values
   const initialValues = {
     username: user?.username || "",
     email: user?.email || "",
@@ -61,17 +61,10 @@ function EditProfile() {
     phoneNumber: Yup.string(),
   });
 
-  const [formikValues, setFormikValues] = useState(initialValues);
-
-  // Populate avatar preview when user loads
+  // Set avatar preview when user loads
   useEffect(() => {
     if (user) {
       setAvatarPreview(user.avatar || "");
-      setFormikValues({
-        username: user.username || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-      });
     }
   }, [user]);
 
@@ -79,7 +72,7 @@ function EditProfile() {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
-    // You can add base64 conversion here if needed
+    // Optionally, handle upload/base64 conversion here
   };
 
   if (!user) {
@@ -95,7 +88,12 @@ function EditProfile() {
       <Paper sx={{ p: 4, maxWidth: 500, width: "100%", borderRadius: 3 }}>
         <Stack justifyContent="flex-end" mb={2}>
           <Link href="/profile" passHref style={{ textDecoration: "none" }}>
-            <Box display="flex" alignItems="center" gap={0.5} sx={{ cursor: "pointer" }}>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={0.5}
+              sx={{ cursor: "pointer" }}
+            >
               <Typography variant="body1" color="success">
                 ← Back
               </Typography>
@@ -111,31 +109,38 @@ function EditProfile() {
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
           <Button component="label" variant="outlined">
             Change Avatar
-            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleAvatarUpload}
+            />
           </Button>
         </Stack>
 
         <Formik
           enableReinitialize
-          initialValues={formikValues}
+          initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
             if (!user._id) {
-              setAlert({ open: true, message: "User ID is missing!", type: "error" });
+              setAlert({
+                open: true,
+                message: "User ID is missing!",
+                type: "error",
+              });
               return;
             }
 
-            setFormikValues(values);
-
             updateProfile({
               variables: {
-                _id: user._id, // <-- must match GraphQL argument
+                _id: user._id, // GraphQL expects _id
                 input: values,
               },
             });
           }}
         >
-          {({ values, errors, touched, handleChange, handleBlur, dirty }) => (
+          {({ values, errors, touched, handleChange, handleBlur }) => (
             <Form>
               <TextField
                 fullWidth
@@ -183,7 +188,7 @@ function EditProfile() {
                 color="primary"
                 sx={{ mt: 3 }}
                 type="submit"
-                disabled={loading || !dirty}
+                disabled={loading} // allow submit
               >
                 {loading ? <CircularProgress size={24} /> : "Save Changes"}
               </Button>
