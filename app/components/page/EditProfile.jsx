@@ -20,24 +20,25 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
 
-export default function EditProfile() {
+function EditProfile() {
   const { user, setUser } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("");
   const [alert, setAlert] = useState({ open: false, message: "", type: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
-    onCompleted: ({ updateUser }) => {
-      if (updateUser?.isSuccess) {
+    onCompleted: (data) => {
+      const res = data?.updateUser;
+      if (res?.isSuccess) {
         setUser({ ...user, ...formikValues });
         setAlert({
           open: true,
-          message: updateUser.messageEn || "Profile updated successfully!",
+          message: res.messageEn || "Profile updated successfully!",
           type: "success",
         });
       } else {
         setAlert({
           open: true,
-          message: updateUser.messageEn || "Failed to update profile.",
+          message: res?.messageEn || "Failed to update profile.",
           type: "error",
         });
       }
@@ -47,6 +48,7 @@ export default function EditProfile() {
     },
   });
 
+  // Formik initial values
   const initialValues = {
     username: user?.username || "",
     email: user?.email || "",
@@ -55,20 +57,21 @@ export default function EditProfile() {
 
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
-    email: Yup.string().email("Invalid email format").required("Email is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
     phoneNumber: Yup.string(),
   });
 
   const [formikValues, setFormikValues] = useState(initialValues);
 
+  // Populate avatar preview when user loads
   useEffect(() => {
     if (user) {
+      setAvatarPreview(user.avatar || "");
       setFormikValues({
         username: user.username || "",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
       });
-      setAvatarPreview(user.avatar || "");
     }
   }, [user]);
 
@@ -76,7 +79,7 @@ export default function EditProfile() {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
-    // Optionally convert to base64 if your backend accepts it
+    // You can add base64 conversion here if needed
   };
 
   if (!user) {
@@ -108,12 +111,7 @@ export default function EditProfile() {
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
           <Button component="label" variant="outlined">
             Change Avatar
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleAvatarUpload}
-            />
+            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
           </Button>
         </Stack>
 
@@ -122,15 +120,17 @@ export default function EditProfile() {
           initialValues={formikValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
-            if (!user?._id) {
+            if (!user._id) {
               setAlert({ open: true, message: "User ID is missing!", type: "error" });
               return;
             }
 
+            setFormikValues(values);
+
             updateProfile({
               variables: {
-                id: user._id, // matches $id in mutation
-                input: { ...values }, // matches $input
+                _id: user._id, // <-- must match GraphQL argument
+                input: values,
               },
             });
           }}
@@ -142,14 +142,12 @@ export default function EditProfile() {
                 label="Username"
                 name="username"
                 value={values.username}
-                onChange={(e) => {
-                  handleChange(e);
-                  setFormikValues({ ...values, username: e.target.value });
-                }}
+                onChange={handleChange}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.username && Boolean(errors.username)}
                 helperText={touched.username && errors.username}
+                disabled={loading}
               />
 
               <TextField
@@ -158,14 +156,12 @@ export default function EditProfile() {
                 name="email"
                 type="email"
                 value={values.email}
-                onChange={(e) => {
-                  handleChange(e);
-                  setFormikValues({ ...values, email: e.target.value });
-                }}
+                onChange={handleChange}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
+                disabled={loading}
               />
 
               <TextField
@@ -173,14 +169,12 @@ export default function EditProfile() {
                 label="Phone Number"
                 name="phoneNumber"
                 value={values.phoneNumber}
-                onChange={(e) => {
-                  handleChange(e);
-                  setFormikValues({ ...values, phoneNumber: e.target.value });
-                }}
+                onChange={handleChange}
                 onBlur={handleBlur}
                 margin="normal"
                 error={touched.phoneNumber && Boolean(errors.phoneNumber)}
                 helperText={touched.phoneNumber && errors.phoneNumber}
+                disabled={loading}
               />
 
               <Button
@@ -213,3 +207,5 @@ export default function EditProfile() {
     </Box>
   );
 }
+
+export default EditProfile;
