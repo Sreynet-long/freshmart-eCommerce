@@ -58,40 +58,45 @@ function EditProfile() {
 
   // Submit updated profile
   const handleSubmit = async () => {
-    if (!user?._id) {
-      setAlert({ open: true, message: "User ID is missing!", type: "error" });
-      return;
-    }
+  // Determine user ID (support both _id and id)
+  const userId = user?._id || user?.id;
 
-    try {
-      const { data } = await updateProfile({
-        variables: {
-          id: user._id,
-          username: form.username,
-          email: form.email,
-          phoneNumber: form.phoneNumber,
-        },
+  if (!userId) {
+    setAlert({ open: true, message: "User ID is missing!", type: "error" });
+    return;
+  }
+
+  try {
+    const { data } = await updateProfile({
+      variables: {
+        id: userId, // pass correct ID
+        username: form.username,
+        email: form.email,
+        phoneNumber: form.phoneNumber,
+      },
+    });
+
+    if (data?.updateUser?.isSuccess) {
+      // Update local user context
+      setUser({ ...user, ...form });
+      setAlert({
+        open: true,
+        message: data.updateUser.messageEn || "Profile updated successfully!",
+        type: "success",
       });
-
-      if (data?.updateUser?.isSuccess) {
-        setUser({ ...user, ...form });
-        setAlert({
-          open: true,
-          message: data.updateUser.messageEn || "Profile updated successfully!",
-          type: "success",
-        });
-      } else {
-        setAlert({
-          open: true,
-          message: data.updateUser.messageEn || "Failed to update profile.",
-          type: "error",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      setAlert({ open: true, message: err.message, type: "error" });
+    } else {
+      setAlert({
+        open: true,
+        message: data.updateUser?.messageEn || "Failed to update profile.",
+        type: "error",
+      });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setAlert({ open: true, message: err.message, type: "error" });
+  }
+};
+
 
   // Show loading if user is not yet loaded
   if (!user) {
