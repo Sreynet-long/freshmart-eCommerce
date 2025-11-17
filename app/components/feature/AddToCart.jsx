@@ -71,7 +71,7 @@ const AddToCart = forwardRef(({ searchKeyword }, ref) => {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    textAlign: "center",
+                    textAlign: "center",  
                     p: 1,
                     height: 300,
                     width: 170,
@@ -79,7 +79,7 @@ const AddToCart = forwardRef(({ searchKeyword }, ref) => {
                 >
                   <CardMedia
                     component="img"
-                    height="130"
+                    height="130px"
                     image={product.imageUrl}
                     alt={product.productName}
                     sx={{ objectFit: "contain", p: 1 }}

@@ -126,7 +126,7 @@ export default function CategoryPageClient({ slug }) {
         {!loading &&
           !error &&
           products.map((product) => (
-            <Grid key={product.id} item xs={6} sm={4} md={3} lg={2.4}>
+            <Grid key={product.id} item xs={6} sm={6} md={3} lg={2.4}>
               <Card
                 sx={{
                   borderRadius: 3,
@@ -147,6 +147,7 @@ export default function CategoryPageClient({ slug }) {
               >
                 <CardMedia
                   component="img"
+                  height="130px"
                   image={product.imageUrl}
                   alt={product.productName}
                   sx={{
