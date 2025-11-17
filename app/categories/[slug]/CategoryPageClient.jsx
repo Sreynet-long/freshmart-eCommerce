@@ -137,7 +137,6 @@ export default function CategoryPageClient({ slug }) {
                   flexDirection: "column",
                   "&:hover": {
                     boxShadow: 4,
-                    
                   },
                   p: 1,
                   height: 300,
@@ -150,14 +149,13 @@ export default function CategoryPageClient({ slug }) {
                   image={product.imageUrl}
                   alt={product.productName}
                   sx={{
-                    height: 160,
                     objectFit: "contain",
                     backgroundColor: "#fafafa",
                     p: 1,
                   }}
                 />
 
-                <CardContent sx={{p: 1, textAlign: "justify", flexGrow: 1 }}>
+                <CardContent sx={{ p: 1, textAlign: "justify", flexGrow: 1 }}>
                   <Typography variant="subtitle1" fontWeight="bold" noWrap>
                     {product.productName}
                   </Typography>
@@ -175,7 +173,7 @@ export default function CategoryPageClient({ slug }) {
                     {product.desc}
                   </Typography>
 
-                  <Typography fontSize="16px" variant="h6" mt={1} color="success.main">
+                  <Typography fontSize="16px" variant="h6" mt={1}>
                     ${product.price?.toFixed(2) ?? "0.00"}
                   </Typography>
                 </CardContent>
