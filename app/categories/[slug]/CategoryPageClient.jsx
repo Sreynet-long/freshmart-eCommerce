@@ -140,6 +140,9 @@ export default function CategoryPageClient({ slug }) {
                     boxShadow: 4,
                     transform: "translateY(-4px)",
                   },
+                  p: 1,
+                  height: 300,
+                  width: 170,
                 }}
               >
                 <CardMedia
