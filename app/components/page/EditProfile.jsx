@@ -33,7 +33,7 @@ function EditProfile() {
     phoneNumber: "",
   });
 
-  // Populate form
+  // Load user into form
   useEffect(() => {
     if (user) {
       setFormValues({
@@ -46,7 +46,6 @@ function EditProfile() {
     }
   }, [user]);
 
-  // Avatar preview (frontend only)
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -56,27 +55,35 @@ function EditProfile() {
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
-    phoneNumber: Yup.string(),
   });
 
   // Mutation
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: (data) => {
-      console.log("Backend response:", data); // log full response
       const res = data?.updateUser;
+
       if (!res) {
         setFeedback({ type: "error", message: "No response from server" });
         return;
       }
 
       if (res.isSuccess) {
-        setUser({ ...user, ...formValues });
+        // If backend returns updated user object
+        if (res.user) {
+          setUser(res.user);
+        } else {
+          // Otherwise merge with current form values
+          setUser((prev) => ({
+            ...prev,
+            ...formValues,
+          }));
+        }
+
         setFeedback({
           type: "success",
           message: res.messageEn || "Profile updated successfully!",
         });
       } else {
-        // show backend message
         setFeedback({
           type: "error",
           message: res.messageEn || res.messageKh || "Update failed",
@@ -84,7 +91,7 @@ function EditProfile() {
       }
     },
     onError: (err) => {
-      console.error("GraphQL error:", err);
+      console.error("GraphQL Error:", err);
       setFeedback({
         type: "error",
         message: err.message || "Something went wrong",
@@ -94,17 +101,17 @@ function EditProfile() {
 
   const handleSubmit = (values) => {
     const userId = user?._id || user?.id;
+
     if (!userId) {
-      setFeedback({ type: "error", message: "User ID is missing!" });
+      setFeedback({ type: "error", message: "User ID missing!" });
       return;
     }
 
     setFormValues(values);
-    setFeedback({ type: "", message: "" });
 
     updateProfile({
       variables: {
-        id: userId,
+        _id: userId, // MUST MATCH BACKEND
         input: {
           username: values.username,
           email: values.email,
@@ -114,31 +121,24 @@ function EditProfile() {
     });
   };
 
-  if (!user) {
+  if (!user)
     return (
       <Box display="flex" justifyContent="center" mt={4}>
         <CircularProgress />
       </Box>
     );
-  }
 
   return (
     <Box p={3} display="flex" justifyContent="center">
       <Paper sx={{ p: 4, maxWidth: 500, width: "100%", borderRadius: 3 }}>
         <Stack justifyContent="flex-end" mb={2}>
-          <Link href="/profile" passHref style={{ textDecoration: "none" }}>
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={0.5}
-              sx={{ cursor: "pointer" }}
-            >
-              <Typography variant="body1" color="success">
-                ← Back
-              </Typography>
-            </Box>
+          <Link href="/profile" style={{ textDecoration: "none" }}>
+            <Typography variant="body1" color="success">
+              ← Back
+            </Typography>
           </Link>
         </Stack>
+
         <Typography variant="h5" fontWeight="bold" mb={3}>
           Edit Profile
         </Typography>
@@ -147,12 +147,7 @@ function EditProfile() {
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
           <Button component="label" variant="outlined">
             Change Avatar
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleAvatarUpload}
-            />
+            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
           </Button>
         </Stack>
 
@@ -177,6 +172,7 @@ function EditProfile() {
                 inputRef={firstFieldRef}
                 disabled={loading}
               />
+
               <TextField
                 fullWidth
                 label="Email"
@@ -190,6 +186,7 @@ function EditProfile() {
                 margin="normal"
                 disabled={loading}
               />
+
               <TextField
                 fullWidth
                 label="Phone Number"
@@ -197,8 +194,6 @@ function EditProfile() {
                 value={values.phoneNumber}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={touched.phoneNumber && Boolean(errors.phoneNumber)}
-                helperText={touched.phoneNumber && errors.phoneNumber}
                 margin="normal"
                 disabled={loading}
               />
@@ -208,7 +203,7 @@ function EditProfile() {
                 variant="contained"
                 type="submit"
                 sx={{ mt: 3 }}
-                disabled={loading || !dirty || !values.username.trim()}
+                disabled={loading || !dirty}
               >
                 {loading ? <CircularProgress size={24} /> : "Save Changes"}
               </Button>
