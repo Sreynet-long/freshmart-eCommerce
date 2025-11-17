@@ -18,6 +18,7 @@ import { useMutation } from "@apollo/client/react";
 import { UPDATE_USER } from "../../schema/User";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import Link from "next/link";
 
 function EditProfile() {
   const { user, setUser } = useAuth();
@@ -25,15 +26,27 @@ function EditProfile() {
   const [alert, setAlert] = useState({ open: false, message: "", type: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
-    onCompleted: ({ updateUser }) => {
-      if (updateUser?.isSuccess) {
-        setUser({ ...user, ...formikValues });
-        setAlert({ open: true, message: updateUser.messageEn || "Profile updated successfully!", type: "success" });
+    onCompleted: (data, { variables }) => {
+      const res = data?.updateUser;
+      if (res?.isSuccess) {
+        // Update auth context with new values
+        setUser({ ...user, ...variables.input });
+        setAlert({
+          open: true,
+          message: res.messageEn || "Profile updated successfully!",
+          type: "success",
+        });
       } else {
-        setAlert({ open: true, message: updateUser?.messageEn || "Update failed", type: "error" });
+        setAlert({
+          open: true,
+          message: res?.messageEn || "Failed to update profile.",
+          type: "error",
+        });
       }
     },
-    onError: (err) => setAlert({ open: true, message: err.message, type: "error" }),
+    onError: (err) => {
+      setAlert({ open: true, message: err.message, type: "error" });
+    },
   });
 
   const initialValues = {
@@ -48,16 +61,10 @@ function EditProfile() {
     phoneNumber: Yup.string(),
   });
 
-  const [formikValues, setFormikValues] = useState(initialValues);
-
+  // Set avatar preview when user loads
   useEffect(() => {
     if (user) {
       setAvatarPreview(user.avatar || "");
-      setFormikValues({
-        username: user.username || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-      });
     }
   }, [user]);
 
@@ -65,14 +72,33 @@ function EditProfile() {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
+    // Optionally, handle upload/base64 conversion here
   };
 
-  if (!user) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
+  if (!user) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box p={3} display="flex" justifyContent="center">
       <Paper sx={{ p: 4, maxWidth: 500, width: "100%", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight="bold" mb={3}>Edit Profile</Typography>
+        <Stack justifyContent="flex-end" mb={2}>
+          <Link href="/profile" passHref style={{ textDecoration: "none" }}>
+            <Box display="flex" alignItems="center" gap={0.5} sx={{ cursor: "pointer" }}>
+              <Typography variant="body1" color="success">
+                ← Back
+              </Typography>
+            </Box>
+          </Link>
+        </Stack>
+
+        <Typography variant="h5" fontWeight="bold" mb={3}>
+          Edit Profile
+        </Typography>
 
         <Stack alignItems="center" mb={2}>
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
@@ -84,48 +110,71 @@ function EditProfile() {
 
         <Formik
           enableReinitialize
-          initialValues={formikValues}
+          initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
-            if (!user?._id) {
+            if (!user._id) {
               setAlert({ open: true, message: "User ID is missing!", type: "error" });
               return;
             }
 
-            setFormikValues(values);
-
             updateProfile({
               variables: {
-                id: user._id, // ✅ Must match mutation variable $id
+                _id: user._id, // GraphQL expects _id
                 input: values,
               },
             });
           }}
         >
-          {({ values, errors, touched, handleChange, handleBlur, dirty }) => (
+          {({ values, errors, touched, handleChange, handleBlur }) => (
             <Form>
               <TextField
-                fullWidth label="Username" name="username"
-                value={values.username} onChange={handleChange} onBlur={handleBlur}
-                margin="normal" error={touched.username && Boolean(errors.username)}
-                helperText={touched.username && errors.username} disabled={loading}
+                fullWidth
+                label="Username"
+                name="username"
+                value={values.username}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                margin="normal"
+                error={touched.username && Boolean(errors.username)}
+                helperText={touched.username && errors.username}
+                disabled={loading}
               />
+
               <TextField
-                fullWidth label="Email" name="email" type="email"
-                value={values.email} onChange={handleChange} onBlur={handleBlur}
-                margin="normal" error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email} disabled={loading}
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={values.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                margin="normal"
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+                disabled={loading}
               />
+
               <TextField
-                fullWidth label="Phone Number" name="phoneNumber"
-                value={values.phoneNumber} onChange={handleChange} onBlur={handleBlur}
-                margin="normal" error={touched.phoneNumber && Boolean(errors.phoneNumber)}
-                helperText={touched.phoneNumber && errors.phoneNumber} disabled={loading}
+                fullWidth
+                label="Phone Number"
+                name="phoneNumber"
+                value={values.phoneNumber}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                margin="normal"
+                error={touched.phoneNumber && Boolean(errors.phoneNumber)}
+                helperText={touched.phoneNumber && errors.phoneNumber}
+                disabled={loading}
               />
 
               <Button
-                fullWidth variant="contained" color="primary" sx={{ mt: 3 }}
-                type="submit" disabled={loading || !dirty}
+                fullWidth
+                variant="contained"
+                color="primary"
+                sx={{ mt: 3 }}
+                type="submit"
+                disabled={loading} // allow submit
               >
                 {loading ? <CircularProgress size={24} /> : "Save Changes"}
               </Button>
@@ -135,10 +184,14 @@ function EditProfile() {
       </Paper>
 
       <Snackbar
-        open={alert.open} autoHideDuration={3000}
+        open={alert.open}
+        autoHideDuration={3000}
         onClose={() => setAlert({ ...alert, open: false })}
       >
-        <Alert severity={alert.type} onClose={() => setAlert({ ...alert, open: false })}>
+        <Alert
+          severity={alert.type}
+          onClose={() => setAlert({ ...alert, open: false })}
+        >
           {alert.message}
         </Alert>
       </Snackbar>
