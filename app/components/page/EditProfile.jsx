@@ -18,7 +18,6 @@ import { useMutation } from "@apollo/client/react";
 import { UPDATE_USER } from "../../schema/User";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import Link from "next/link";
 
 function EditProfile() {
   const { user, setUser } = useAuth();
@@ -26,29 +25,6 @@ function EditProfile() {
 
   const [avatarPreview, setAvatarPreview] = useState("");
   const [feedback, setFeedback] = useState({ type: "", message: "" });
-
-  const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
-    onCompleted: ({ updateUser }) => {
-      if (updateUser?.isSuccess) {
-        setUser({ ...user, ...formValues });
-        setFeedback({
-          type: "success",
-          message: updateUser.messageEn || "Profile updated successfully!",
-        });
-      } else {
-        setFeedback({
-          type: "error",
-          message: updateUser?.messageEn || "Update failed",
-        });
-      }
-    },
-    onError: (err) => {
-      setFeedback({
-        type: "error",
-        message: err.message || "Something went wrong",
-      });
-    },
-  });
 
   const [formValues, setFormValues] = useState({
     username: "",
@@ -69,7 +45,7 @@ function EditProfile() {
     }
   }, [user]);
 
-  // Avatar preview only for frontend
+  // Avatar preview (frontend only)
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -82,7 +58,39 @@ function EditProfile() {
     phoneNumber: Yup.string(),
   });
 
-  // Submit
+  // Mutation
+  const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
+    onCompleted: (data) => {
+      console.log("Backend response:", data); // log full response
+      const res = data?.updateUser;
+      if (!res) {
+        setFeedback({ type: "error", message: "No response from server" });
+        return;
+      }
+
+      if (res.isSuccess) {
+        setUser({ ...user, ...formValues });
+        setFeedback({
+          type: "success",
+          message: res.messageEn || "Profile updated successfully!",
+        });
+      } else {
+        // show backend message
+        setFeedback({
+          type: "error",
+          message: res.messageEn || res.messageKh || "Update failed",
+        });
+      }
+    },
+    onError: (err) => {
+      console.error("GraphQL error:", err);
+      setFeedback({
+        type: "error",
+        message: err.message || "Something went wrong",
+      });
+    },
+  });
+
   const handleSubmit = (values) => {
     const userId = user?._id || user?.id;
     if (!userId) {
@@ -93,13 +101,14 @@ function EditProfile() {
     setFormValues(values);
     setFeedback({ type: "", message: "" });
 
-    // ✅ Only send the fields backend expects
     updateProfile({
       variables: {
         id: userId,
-        username: values.username,
-        email: values.email,
-        phoneNumber: values.phoneNumber,
+        input: {
+          username: values.username,
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+        },
       },
     });
   };
@@ -209,7 +218,7 @@ function EditProfile() {
 
       <Snackbar
         open={!!feedback.message}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={() => setFeedback({ ...feedback, message: "" })}
       >
         <Alert
