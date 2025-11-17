@@ -21,22 +21,32 @@ import * as Yup from "yup";
 
 function EditProfile() {
   const { user, setUser } = useAuth();
-  const [avatarPreview, setAvatarPreview] = useState("");
   const firstFieldRef = useRef(null);
 
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: ({ updateUser }) => {
       if (updateUser?.isSuccess) {
-        setUser({ ...user, ...formValues });
-        setFeedback({ type: "success", message: updateUser.messageEn || "Profile updated successfully!" });
+        setUser({ ...user, ...formValues, avatar: avatarPreview });
+        setFeedback({
+          type: "success",
+          message: updateUser.messageEn || "Profile updated successfully!",
+        });
       } else {
-        setFeedback({ type: "error", message: updateUser?.messageEn || "Update failed" });
+        setFeedback({
+          type: "error",
+          message: updateUser?.messageEn || "Update failed",
+        });
       }
     },
     onError: (err) => {
-      setFeedback({ type: "error", message: err.message || "Something went wrong" });
+      setFeedback({
+        type: "error",
+        message: err.message || "Something went wrong",
+      });
     },
   });
 
@@ -46,7 +56,7 @@ function EditProfile() {
     phoneNumber: "",
   });
 
-  // Populate form on load
+  // Populate form
   useEffect(() => {
     if (user) {
       setFormValues({
@@ -59,11 +69,12 @@ function EditProfile() {
     }
   }, [user]);
 
-  // Avatar preview
+  // Avatar upload
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
+    setAvatarFile(file);
   };
 
   const validationSchema = Yup.object({
@@ -72,8 +83,8 @@ function EditProfile() {
     phoneNumber: Yup.string(),
   });
 
-  // Form submission
-  const handleSubmit = (values) => {
+  // Submit
+  const handleSubmit = async (values) => {
     const userId = user?._id || user?.id;
     if (!userId) {
       setFeedback({ type: "error", message: "User ID is missing!" });
@@ -83,16 +94,32 @@ function EditProfile() {
     setFormValues(values);
     setFeedback({ type: "", message: "" });
 
-    // ✅ Flat variables instead of input object
+    // Prepare avatar base64 if file exists
+    let avatarBase64 = null;
+    if (avatarFile) {
+      avatarBase64 = await fileToBase64(avatarFile);
+    }
+
+    // Flat variables
     updateProfile({
       variables: {
         id: userId,
         username: values.username,
         email: values.email,
         phoneNumber: values.phoneNumber,
+        avatar: avatarBase64,
       },
     });
   };
+
+  // Helper: convert file to base64
+  const fileToBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
   if (!user) {
     return (
@@ -113,7 +140,12 @@ function EditProfile() {
           <Avatar src={avatarPreview} sx={{ width: 90, height: 90, mb: 1 }} />
           <Button component="label" variant="outlined">
             Change Avatar
-            <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleAvatarUpload}
+            />
           </Button>
         </Stack>
 
