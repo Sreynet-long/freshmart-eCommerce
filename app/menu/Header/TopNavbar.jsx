@@ -154,9 +154,9 @@ export default function TopNavbar({ onSearch }) {
           FreshMart
         </Typography>
       </Link>
-      <Divider/>
+      <Divider />
       {/* Mobile search inside drawer */}
-      <Box sx={{ px: 2, pb: 2 , mt: 3}}>
+      <Box sx={{ px: 2, pb: 2, mt: 3 }}>
         {/* <TextField
           select
           size="small"
@@ -189,7 +189,7 @@ export default function TopNavbar({ onSearch }) {
       <Divider />
 
       <List>
-        {/* {navItems.map((item) =>
+        {navItems.map((item) =>
           item.subItems ? (
             <Box key={item.label}>
               <ListItemButton onClick={() => toggleDrawerCollapse(item.label)}>
@@ -230,7 +230,7 @@ export default function TopNavbar({ onSearch }) {
               <ListItemText primary={item.label} />
             </ListItemButton>
           )
-        )} */}
+        )}
 
         <Divider />
 
@@ -436,7 +436,7 @@ export default function TopNavbar({ onSearch }) {
             <MenuIcon />
           </IconButton>
 
-          <TextField
+          {/* <TextField
             select
             size="small"
             value={selectedCategory}
@@ -448,7 +448,7 @@ export default function TopNavbar({ onSearch }) {
                 {cat}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
 
           <Autocomplete
             freeSolo
