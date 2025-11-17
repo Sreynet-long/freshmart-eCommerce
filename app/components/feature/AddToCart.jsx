@@ -108,6 +108,7 @@ const AddToCart = forwardRef(({ searchKeyword }, ref) => {
                     <Button
                       color="success"
                       variant="contained"
+                      fullWidth
                       size="small"
                       sx={{ mt: 1, borderRadius: "20px", textTransform: "none" }}
                       onClick={() => addToCart(product)}

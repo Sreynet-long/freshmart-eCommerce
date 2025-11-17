@@ -187,7 +187,7 @@ export default function CategoryPageClient({ slug }) {
                     color="success"
                     size="small"
                     onClick={() => addToCart(product)}
-                    sx={{ borderRadius: 20, textTransform: "none", mt: 1 }}
+                    sx={{ borderRadius: "20px", textTransform: "none", mt: 1 }}
                   >
                     🛒 Add to Cart
                   </Button>
