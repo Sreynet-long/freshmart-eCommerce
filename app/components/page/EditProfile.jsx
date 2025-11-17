@@ -33,7 +33,7 @@ function EditProfile() {
     phoneNumber: "",
   });
 
-  // Load user into form
+  // Load user data into form
   useEffect(() => {
     if (user) {
       setFormValues({
@@ -46,6 +46,7 @@ function EditProfile() {
     }
   }, [user]);
 
+  // Avatar preview
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -68,16 +69,11 @@ function EditProfile() {
       }
 
       if (res.isSuccess) {
-        // If backend returns updated user object
-        if (res.user) {
-          setUser(res.user);
-        } else {
-          // Otherwise merge with current form values
-          setUser((prev) => ({
-            ...prev,
-            ...formValues,
-          }));
-        }
+        // Update auth user state
+        setUser((prev) => ({
+          ...prev,
+          ...formValues, // Use updated form values
+        }));
 
         setFeedback({
           type: "success",
@@ -111,7 +107,7 @@ function EditProfile() {
 
     updateProfile({
       variables: {
-        _id: userId, // MUST MATCH BACKEND
+        id: userId, // MUST use "id" because your mutation requires $id
         input: {
           username: values.username,
           email: values.email,
@@ -166,9 +162,9 @@ function EditProfile() {
                 value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                margin="normal"
                 error={touched.username && Boolean(errors.username)}
                 helperText={touched.username && errors.username}
-                margin="normal"
                 inputRef={firstFieldRef}
                 disabled={loading}
               />
@@ -181,9 +177,9 @@ function EditProfile() {
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                margin="normal"
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
-                margin="normal"
                 disabled={loading}
               />
 
