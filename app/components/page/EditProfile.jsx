@@ -20,20 +20,19 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
 
-function EditProfile() {
+export default function EditProfile() {
   const { user, setUser } = useAuth();
   const firstFieldRef = useRef(null);
 
   const [avatarPreview, setAvatarPreview] = useState("");
   const [feedback, setFeedback] = useState({ type: "", message: "" });
-
   const [formValues, setFormValues] = useState({
     username: "",
     email: "",
     phoneNumber: "",
   });
 
-  // Populate form
+  // Populate form when user data is available
   useEffect(() => {
     if (user) {
       setFormValues({
@@ -62,7 +61,6 @@ function EditProfile() {
   // Mutation
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: (data) => {
-      console.log("Backend response:", data); // log full response
       const res = data?.updateUser;
       if (!res) {
         setFeedback({ type: "error", message: "No response from server" });
@@ -76,7 +74,6 @@ function EditProfile() {
           message: res.messageEn || "Profile updated successfully!",
         });
       } else {
-        // show backend message
         setFeedback({
           type: "error",
           message: res.messageEn || res.messageKh || "Update failed",
@@ -84,7 +81,6 @@ function EditProfile() {
       }
     },
     onError: (err) => {
-      console.error("GraphQL error:", err);
       setFeedback({
         type: "error",
         message: err.message || "Something went wrong",
@@ -102,9 +98,10 @@ function EditProfile() {
     setFormValues(values);
     setFeedback({ type: "", message: "" });
 
+    // ✅ Corrected variable name: use _id
     updateProfile({
       variables: {
-        id: userId,
+        _id: userId,
         input: {
           username: values.username,
           email: values.email,
@@ -127,18 +124,16 @@ function EditProfile() {
       <Paper sx={{ p: 4, maxWidth: 500, width: "100%", borderRadius: 3 }}>
         <Stack justifyContent="flex-end" mb={2}>
           <Link href="/profile" passHref style={{ textDecoration: "none" }}>
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={0.5}
+            <Typography
+              variant="body1"
+              color="success"
               sx={{ cursor: "pointer" }}
             >
-              <Typography variant="body1" color="success">
-                ← Back
-              </Typography>
-            </Box>
+              ← Back
+            </Typography>
           </Link>
         </Stack>
+
         <Typography variant="h5" fontWeight="bold" mb={3}>
           Edit Profile
         </Typography>
@@ -215,22 +210,20 @@ function EditProfile() {
             </Form>
           )}
         </Formik>
-      </Paper>
 
-      <Snackbar
-        open={!!feedback.message}
-        autoHideDuration={5000}
-        onClose={() => setFeedback({ ...feedback, message: "" })}
-      >
-        <Alert
-          severity={feedback.type}
+        <Snackbar
+          open={!!feedback.message}
+          autoHideDuration={5000}
           onClose={() => setFeedback({ ...feedback, message: "" })}
         >
-          {feedback.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            severity={feedback.type}
+            onClose={() => setFeedback({ ...feedback, message: "" })}
+          >
+            {feedback.message}
+          </Alert>
+        </Snackbar>
+      </Paper>
     </Box>
   );
 }
-
-export default EditProfile;
