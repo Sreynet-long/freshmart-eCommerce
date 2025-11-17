@@ -33,11 +33,9 @@ function EditProfile() {
     phoneNumber: "",
   });
 
-  // Load user data into form
+  // Populate form with current user data
   useEffect(() => {
     if (user) {
-      console.log("User object:", user);
-
       setFormValues({
         username: user.username || "",
         email: user.email || "",
@@ -55,26 +53,26 @@ function EditProfile() {
     setAvatarPreview(URL.createObjectURL(file));
   };
 
+  // Validation
   const validationSchema = Yup.object({
     username: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
   });
 
-  // Mutation
+  // GraphQL mutation
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: (data) => {
       const res = data?.updateUser;
-
       if (!res) {
         setFeedback({ type: "error", message: "No response from server" });
         return;
       }
 
       if (res.isSuccess) {
-        // Update auth user state
+        // Update user in auth context
         setUser((prev) => ({
           ...prev,
-          ...formValues, // Use updated form values
+          ...formValues,
         }));
 
         setFeedback({
@@ -89,7 +87,7 @@ function EditProfile() {
       }
     },
     onError: (err) => {
-      console.error("GraphQL Error:", err);
+      console.error("GraphQL error:", err);
       setFeedback({
         type: "error",
         message: err.message || "Something went wrong",
@@ -98,27 +96,16 @@ function EditProfile() {
   });
 
   const handleSubmit = (values) => {
-    const userId = user?._id || user?.id;
-    console.log("Submitting userId =", userId);
-
-    if (!userId) {
-      setFeedback({ type: "error", message: "User ID missing!" });
+    if (!user?._id) {
+      setFeedback({ type: "error", message: "User ID is missing!" });
       return;
     }
 
     setFormValues(values);
-    console.log("Sending variables:", {
-  id: userId,
-  input: {
-    username: values.username,
-    email: values.email,
-    phoneNumber: values.phoneNumber,
-  },
-});
 
     updateProfile({
       variables: {
-        id: userId, // MUST use "id" because your mutation requires $id
+        _id: user._id, // <-- Must match backend (_id)
         input: {
           username: values.username,
           email: values.email,
@@ -173,9 +160,9 @@ function EditProfile() {
                 value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                margin="normal"
                 error={touched.username && Boolean(errors.username)}
                 helperText={touched.username && errors.username}
+                margin="normal"
                 inputRef={firstFieldRef}
                 disabled={loading}
               />
@@ -188,9 +175,9 @@ function EditProfile() {
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                margin="normal"
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
+                margin="normal"
                 disabled={loading}
               />
 
