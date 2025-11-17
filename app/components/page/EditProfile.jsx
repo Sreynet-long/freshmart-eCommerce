@@ -24,13 +24,12 @@ function EditProfile() {
   const firstFieldRef = useRef(null);
 
   const [avatarPreview, setAvatarPreview] = useState("");
-  const [avatarFile, setAvatarFile] = useState(null);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const [updateProfile, { loading }] = useMutation(UPDATE_USER, {
     onCompleted: ({ updateUser }) => {
       if (updateUser?.isSuccess) {
-        setUser({ ...user, ...formValues, avatar: avatarPreview });
+        setUser({ ...user, ...formValues });
         setFeedback({
           type: "success",
           message: updateUser.messageEn || "Profile updated successfully!",
@@ -69,12 +68,11 @@ function EditProfile() {
     }
   }, [user]);
 
-  // Avatar upload
+  // Avatar preview only for frontend
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarPreview(URL.createObjectURL(file));
-    setAvatarFile(file);
   };
 
   const validationSchema = Yup.object({
@@ -84,7 +82,7 @@ function EditProfile() {
   });
 
   // Submit
-  const handleSubmit = async (values) => {
+  const handleSubmit = (values) => {
     const userId = user?._id || user?.id;
     if (!userId) {
       setFeedback({ type: "error", message: "User ID is missing!" });
@@ -94,32 +92,16 @@ function EditProfile() {
     setFormValues(values);
     setFeedback({ type: "", message: "" });
 
-    // Prepare avatar base64 if file exists
-    let avatarBase64 = null;
-    if (avatarFile) {
-      avatarBase64 = await fileToBase64(avatarFile);
-    }
-
-    // Flat variables
+    // ✅ Only send the fields backend expects
     updateProfile({
       variables: {
         id: userId,
         username: values.username,
         email: values.email,
         phoneNumber: values.phoneNumber,
-        avatar: avatarBase64,
       },
     });
   };
-
-  // Helper: convert file to base64
-  const fileToBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
 
   if (!user) {
     return (
