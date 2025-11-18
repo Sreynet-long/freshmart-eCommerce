@@ -33,15 +33,11 @@ import Link from "next/link";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import HomeIcon from "@mui/icons-material/Home";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import EditProfile from "../components/page/EditProfile";
 
 export default function ProfilePage() {
   const { user, logout, setAlert } = useAuth();
@@ -63,7 +59,6 @@ export default function ProfilePage() {
   });
 
   const [deleteOrder] = useMutation(DELETE_ORDER);
-  const [createOrder] = useMutation(CREATE_ORDER);
 
   const orders = data?.getOrders ?? [];
 
@@ -82,19 +77,12 @@ export default function ProfilePage() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "70vh",
+          p: 2,
         }}
       >
         <Typography variant="h6" color="error">
           You are not logged in
         </Typography>
-        {/* <Button
-          variant="contained"
-          component={Link}
-          href="/auth"
-          sx={{ mt: 2, bgcolor: "green" }}
-        >
-          Login
-        </Button> */}
       </Box>
     );
   }
@@ -143,19 +131,6 @@ export default function ProfilePage() {
     }
   };
 
-  // const handleReorder = async (orderId) => {
-  //   try {
-  //     await createOrder({ variables: { input: { previousOrderId: orderId } } });
-  //     await refetch();
-  //     setAlert?.({ type: "success", message: "Re-order created." });
-  //   } catch (err) {
-  //     console.error("Reorder error:", err);
-  //     setAlert?.({ type: "error", message: "Unable to re-order." });
-  //   } finally {
-  //     closeConfirm();
-  //   }
-  // };
-
   const statusColor = (status) => {
     if (!status) return "default";
     const s = String(status).toLowerCase();
@@ -174,25 +149,38 @@ export default function ProfilePage() {
   const formatOrderId = (id) => `#FM-${id.slice(-6).toUpperCase()}`;
 
   return (
-    <Box sx={{ display: "flex", gap: 3, p: 3, minHeight: "80vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        gap: { xs: 2, md: 3 },
+        p: { xs: 2, md: 3 },
+        minHeight: "80vh",
+      }}
+    >
       {/* Profile Sidebar */}
       <Paper
         elevation={3}
         sx={{
-          width: 300,
-          position: "sticky",
-          top: 24,
+          width: { xs: "100%", md: 300 },
+          position: { xs: "relative", md: "sticky" },
+          top: { md: 24 },
           alignSelf: "flex-start",
           p: 2,
           borderRadius: 2,
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems="center"
+          sx={{ mb: 2 }}
+        >
           <Avatar
             src={user?.avatar || "/avatars/default-avatar1.png"}
             sx={{ width: 72, height: 72 }}
           />
-          <Box>
+          <Box textAlign={{ xs: "center", sm: "left" }}>
             <Typography variant="h6">{user?.username}</Typography>
             <Typography variant="caption" color="text.secondary">
               {user?.role || "Customer"}
@@ -204,14 +192,12 @@ export default function ProfilePage() {
 
         <Stack spacing={1}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <AccountCircleIcon />
+            <AccountCircleOutlinedIcon />
             <Typography variant="body2">{user?.username}</Typography>
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
             <PhoneIcon />
-            <Typography variant="body2">
-              {user?.phoneNumber || "N/A"}
-            </Typography>
+            <Typography variant="body2">{user?.phoneNumber || "N/A"}</Typography>
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
             <ReceiptLongIcon />
@@ -219,31 +205,49 @@ export default function ProfilePage() {
           </Stack>
         </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ mt: 2 }}
+        >
           <Button
             variant="outlined"
             startIcon={<EditIcon />}
             component={Link}
             href="/profile/edit"
+            fullWidth={{ xs: true, sm: false }}
           >
             Edit Profile
           </Button>
-          <Button variant="contained" color="error" onClick={logout}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={logout}
+            fullWidth={{ xs: true, sm: false }}
+          >
             Logout
           </Button>
         </Stack>
       </Paper>
 
       {/* Orders List */}
-      <Box sx={{ flexGrow: 1, maxHeight: "82vh", overflowY: "auto", pr: 1 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          maxHeight: { xs: "auto", md: "82vh" },
+          overflowY: { xs: "visible", md: "auto" },
+          pr: { xs: 0, md: 1 },
+          mt: { xs: 2, md: 0 },
+        }}
+      >
         {/* Breadcrumb & Search */}
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
-          alignItems="center"
+          alignItems={{ xs: "flex-start", md: "center" }}
           sx={{ mb: 2 }}
         >
-          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 4 }}>
+          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: { xs: 2, md: 0 } }}>
             <Link href="/" passHref style={{ textDecoration: "none" }}>
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" color="success" />
@@ -271,7 +275,7 @@ export default function ProfilePage() {
               display: "flex",
               gap: 1,
               alignItems: "center",
-              mt: { xs: 2, md: 0 },
+              width: { xs: "100%", md: "auto" },
             }}
           >
             <TextField
@@ -279,6 +283,7 @@ export default function ProfilePage() {
               placeholder="Search by Order ID"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              fullWidth
             />
             <Button variant="outlined" onClick={() => setSearch("")}>
               Clear
@@ -309,11 +314,13 @@ export default function ProfilePage() {
             >
               <CardContent>
                 <Stack
-                  direction="row"
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={{ xs: 2, md: 3 }}
                   justifyContent="space-between"
-                  alignItems="flex-start"
+                  alignItems={{ xs: "flex-start", md: "flex-start" }}
                 >
-                  <Box>
+                  {/* Left Box */}
+                  <Box sx={{ flex: { xs: "auto", md: 1 } }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Typography variant="subtitle1">
                         Order ID: {formatOrderId(order.id)}
@@ -331,120 +338,58 @@ export default function ProfilePage() {
                       {order?.shippingInfo?.address ?? "No address"} •{" "}
                       {order?.shippingInfo?.country ?? ""}
                     </Typography>
-                  </Box>
 
-                  <Box sx={{ textAlign: "right" }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {dayjs(Number(order.createdAt)).format(
-                        "MMM DD, YYYY - hh:mm A"
+                    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                      {order.items?.slice(0, 3).map((it, idx) => (
+                        <Stack
+                          key={idx}
+                          direction="row"
+                          spacing={1}
+                          alignItems="center"
+                          sx={{ mb: 1 }}
+                        >
+                          <CardMedia
+                            component="img"
+                            image={it?.product?.imageUrl || "/default-product.png"}
+                            alt={it?.product?.productName}
+                            sx={{
+                              width: 72,
+                              height: 72,
+                              objectFit: "cover",
+                              borderRadius: 1,
+                            }}
+                          />
+                          <Box>
+                            <Typography variant="body2">
+                              {it.product?.productName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Qty: {it?.quantity} • $
+                              {Number(it?.price ?? it.product?.price ?? 0).toFixed(2)}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      ))}
+                      {order.items?.length > 3 && (
+                        <Typography variant="caption" color="text.secondary">
+                          +{order.items.length - 3} more items
+                        </Typography>
                       )}
-                    </Typography>
-                    <Typography variant="h6" sx={{ mt: 1 }}>
-                      ${Number(order.totalPrice ?? 0).toFixed(2)}
-                    </Typography>
-
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      justifyContent="flex-end"
-                      sx={{ mt: 1 }}
-                    >
-                      {/* <Tooltip title="Re-order">
-                        <Button
-                          size="small"
-                          startIcon={<RestartAltIcon />}
-                          onClick={() =>
-                            askConfirm({
-                              action: "reorder",
-                              orderId: order.id,
-                              title: "Create Re-order",
-                              message: "Create a new order from this order?",
-                            })
-                          }
-                        >
-                          Re-order
-                        </Button>
-                      </Tooltip> */}
-                      <Tooltip title="Delete order">
-                        <Button
-                          size="small"
-                          color="error"
-                          startIcon={<DeleteIcon />}
-                          onClick={() =>
-                            askConfirm({
-                              action: "delete",
-                              orderId: order.id,
-                              title: "Delete Order",
-                              message:
-                                "Are you sure you want to delete this order?",
-                            })
-                          }
-                        >
-                          Delete
-                        </Button>
-                      </Tooltip>
                     </Stack>
                   </Box>
-                </Stack>
 
-                <Divider sx={{ my: 2 }} />
-
-                <Stack direction="row" spacing={2} alignItems="flex-start">
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 1,
-                      minWidth: 260,
-                    }}
-                  >
-                    {order.items?.slice(0, 3).map((it, idx) => (
-                      <Stack
-                        key={idx}
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                      >
-                        <CardMedia
-                          component="img"
-                          image={
-                            it?.product?.imageUrl || "/default-product.png"
-                          }
-                          alt={it?.product?.productName}
-                          sx={{
-                            width: 72,
-                            height: 72,
-                            objectFit: "cover",
-                            borderRadius: 1,
-                          }}
-                        />
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2">
-                            {it.product?.productName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Qty: {it?.quantity} • $
-                            {Number(
-                              it?.price ?? it.product?.price ?? 0
-                            ).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    ))}
-                    {order.items?.length > 3 && (
-                      <Typography variant="caption" color="text.secondary">
-                        +{order.items.length - 3} more items
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box sx={{ flex: 1 }}>
+                  {/* Right Box */}
+                  <Box sx={{ flex: { xs: "auto", md: 1 }, mt: { xs: 2, md: 0 } }}>
                     <Stack
                       direction="row"
                       justifyContent="space-between"
                       alignItems="center"
                     >
-                      <Typography variant="subtitle2">Order details</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {dayjs(Number(order.createdAt)).format(
+                          "MMM DD, YYYY - hh:mm A"
+                        )}
+                      </Typography>
                       <IconButton
                         onClick={() => handleExpandToggle(order.id)}
                         aria-expanded={expandedId === order.id}
@@ -460,6 +405,29 @@ export default function ProfilePage() {
                         />
                       </IconButton>
                     </Stack>
+                    <Typography variant="h6" sx={{ mt: 1 }}>
+                      ${Number(order.totalPrice ?? 0).toFixed(2)}
+                    </Typography>
+
+                    <Stack direction="row" spacing={1} justifyContent="flex-end" mt={1} flexWrap="wrap">
+                      <Tooltip title="Delete order">
+                        <Button
+                          size="small"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() =>
+                            askConfirm({
+                              action: "delete",
+                              orderId: order.id,
+                              title: "Delete Order",
+                              message: "Are you sure you want to delete this order?",
+                            })
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Tooltip>
+                    </Stack>
 
                     <Collapse in={expandedId === order.id}>
                       <Box sx={{ mt: 2 }}>
@@ -472,12 +440,7 @@ export default function ProfilePage() {
                             {order?.shippingInfo?.address ?? "N/A"}
                           </Typography>
                         </Stack>
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          alignItems="center"
-                          sx={{ mt: 0.5 }}
-                        >
+                        <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
                           <PhoneIcon />
                           <Typography variant="body2">
                             {order?.shippingInfo?.phone ?? "N/A"}
@@ -497,10 +460,7 @@ export default function ProfilePage() {
                               {it?.product?.productName} x {it?.quantity}
                             </Typography>
                             <Typography variant="body2">
-                              $
-                              {Number(
-                                it?.price ?? it?.product?.price ?? 0
-                              ).toFixed(2)}
+                              ${Number(it?.price ?? it?.product?.price ?? 0).toFixed(2)}
                             </Typography>
                           </Stack>
                         ))}
@@ -514,17 +474,10 @@ export default function ProfilePage() {
                         </Stack>
 
                         {order.paymentProof && (
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            alignItems="center"
-                            sx={{ mt: 1 }}
-                          >
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                             <Button
                               size="small"
-                              onClick={() =>
-                                openPaymentProof(order.paymentProof)
-                              }
+                              onClick={() => openPaymentProof(order.paymentProof)}
                             >
                               View Payment Proof
                             </Button>
@@ -541,20 +494,10 @@ export default function ProfilePage() {
       </Box>
 
       {/* Payment proof dialog */}
-      <Dialog
-        open={openProof.open}
-        onClose={closePaymentProof}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openProof.open} onClose={closePaymentProof} maxWidth="sm" fullWidth>
         <DialogTitle>Payment Proof</DialogTitle>
         <DialogContent>
-          <Box
-            component="img"
-            src={openProof.url}
-            alt="payment proof"
-            sx={{ width: "100%", borderRadius: 1 }}
-          />
+          <Box component="img" src={openProof.url} alt="payment proof" sx={{ width: "100%", borderRadius: 1 }} />
         </DialogContent>
         <DialogActions>
           <Button onClick={closePaymentProof}>Close</Button>
@@ -571,10 +514,7 @@ export default function ProfilePage() {
           <Button onClick={closeConfirm}>No</Button>
           <Button
             onClick={() => {
-              if (confirmDialog.action === "delete")
-                handleDeleteOrder(confirmDialog.orderId);
-              // if (confirmDialog.action === "reorder")
-              //   handleReorder(confirmDialog.orderId);
+              if (confirmDialog.action === "delete") handleDeleteOrder(confirmDialog.orderId);
             }}
             autoFocus
             color={confirmDialog.action === "delete" ? "error" : "primary"}
