@@ -1,6 +1,5 @@
-// src/components/Newsletter.jsx
 "use client";
-import React,  {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -15,7 +14,6 @@ export default function Newsletter() {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    // Ensures component only renders after client hydration
     setMounted(true);
   }, []);
 
@@ -23,10 +21,10 @@ export default function Newsletter() {
 
   const handleSubscribe = () => {
     if (!email) return;
-    // Add your subscription logic here
     alert(`Subscribed with: ${email}`);
     setEmail("");
   };
+
   return (
     <Box
       display="flex"
@@ -34,12 +32,12 @@ export default function Newsletter() {
         textAlign: "center",
         py: 6,
         bgcolor: "#cee6d0ff",
-        borderTopRightRadius: "170px",
-        borderTopLeftRadius: "170px",
+        borderTopRightRadius: { xs: "80px", sm: "170px" },
+        borderTopLeftRadius: { xs: "80px", sm: "170px" },
         mt: "15px",
       }}
     >
-      <Stack sx={{ maxWidth: "1200px", mx: "auto" }}>
+      <Stack sx={{ maxWidth: "1200px", mx: "auto", px: 2 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold">
           Stay Updated
         </Typography>
@@ -50,19 +48,34 @@ export default function Newsletter() {
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
           justifyContent="center"
+          alignItems="center"
         >
           <TextField
-            id="newsletter-email" 
+            id="newsletter-email"
             label="Enter your email"
             variant="outlined"
-            sx={{ borderRadius: "27px", width: "450px" }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{
+              borderRadius: "27px",
+              width: { xs: "100%", sm: "450px" },
+            }}
           />
           <Button
+            onClick={handleSubscribe}
             variant="contained"
             color="success"
-            sx={{ px: 4, borderRadius: "25px" }}
+            sx={{
+              px: { xs: 4, sm: 6 },
+              py: { xs: 1.5, sm: 2 },
+              borderRadius: "25px",
+              width: { xs: "100%", sm: "auto" },
+            }}
           >
-            <span>🔔</span>Subscribe
+            <span role="img" aria-label="bell">
+              🔔
+            </span>{" "}
+            Subscribe
           </Button>
         </Stack>
       </Stack>
