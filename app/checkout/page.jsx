@@ -145,51 +145,64 @@ export default function CheckoutPage() {
     }
   };
 
-  return (
-    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1000, mx: "auto" }}>
-      <CheckoutBreadcrumb activeStep={activeStep} />
-
-      <Paper
-        elevation={1}
+return (
+  <>
+    {showSuccess ? (
+      // FULLSCREEN SUCCESS PAGE
+      <Box
         sx={{
-          p: { xs: 2, sm: 3 },
-          borderRadius: 2,
+          minHeight: "70vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          py: 4,
         }}
       >
-        {!showSuccess && (
-          <Stepper
-            activeStep={activeStep}
-            alternativeLabel={!isMobile}
-            orientation={isMobile ? "vertical" : "horizontal"}
-            sx={{ mb: { xs: 2, md: 3 } }}
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        )}
+        <OrderSuccess />
+      </Box>
+    ) : (
+      // NORMAL CHECKOUT LAYOUT
+      <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1000, mx: "auto" }}>
+        <CheckoutBreadcrumb activeStep={activeStep} />
 
-        <Suspense
-          fallback={
-            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-              <CircularProgress />
-            </Box>
-          }
+        <Paper
+          elevation={1}
+          sx={{
+            p: { xs: 2, sm: 3 },
+            borderRadius: 2,
+          }}
         >
-          <Fade in>
-            <Box minHeight="320px">{showSuccess ? <OrderSuccess /> : renderStep()}</Box>
-          </Fade>
-        </Suspense>
+          {!showSuccess && (
+            <Stepper
+              activeStep={activeStep}
+              alternativeLabel={!isMobile}
+              orientation={isMobile ? "vertical" : "horizontal"}
+              sx={{ mb: { xs: 2, md: 3 } }}
+            >
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          )}
 
-        {/* validation message */}
-        {validationError && (
-          <Box sx={{ color: "error.main", mt: 2 }}>{validationError}</Box>
-        )}
+          <Suspense
+            fallback={
+              <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                <CircularProgress />
+              </Box>
+            }
+          >
+            <Fade in>
+              <Box minHeight="320px">{renderStep()}</Box>
+            </Fade>
+          </Suspense>
 
-        {/* Navigation buttons */}
-        {!showSuccess && (
+          {validationError && (
+            <Box sx={{ color: "error.main", mt: 2 }}>{validationError}</Box>
+          )}
+
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={2}
@@ -201,7 +214,6 @@ export default function CheckoutPage() {
                 variant="outlined"
                 onClick={prevStep}
                 disabled={activeStep === 0}
-                size="medium"
               >
                 Back
               </Button>
@@ -209,16 +221,11 @@ export default function CheckoutPage() {
 
             <Box sx={{ display: "flex", gap: 2 }}>
               {activeStep < steps.length - 1 ? (
-                <Button variant="contained" onClick={nextStep} size="medium">
+                <Button variant="contained" onClick={nextStep}>
                   Next
                 </Button>
               ) : (
-                <Button
-                  variant="contained"
-                  onClick={handlePayNow}
-                  disabled={loading}
-                  size="medium"
-                >
+                <Button variant="contained" onClick={handlePayNow} disabled={loading}>
                   {loading ? (
                     <CircularProgress size={20} color="inherit" />
                   ) : (
@@ -228,8 +235,10 @@ export default function CheckoutPage() {
               )}
             </Box>
           </Stack>
-        )}
-      </Paper>
-    </Box>
-  );
+        </Paper>
+      </Box>
+    )}
+  </>
+);
+
 }
