@@ -1,22 +1,34 @@
 "use client";
 import React, { lazy, Suspense, useState } from "react";
-import { Box, CircularProgress, Button, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Button,
+  Stack,
+  Stepper,
+  Step,
+  StepLabel,
+  useMediaQuery,
+  Paper,
+  Fade,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useCart } from "@/app/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useMutation } from "@apollo/client/react";
-import { CREATE_ORDER } from "../schema/Order";
-import { useRouter } from "next/navigation";
+import { CREATE_ORDER } from "@/app/schema/Order";
 import CheckoutBreadcrumb from "./CheckoutBreadcrumb";
-import OrderSuccess from "./OrderSuccess";
 
 const CartStep = lazy(() => import("./steps/CartStep"));
 const ShippingStep = lazy(() => import("./steps/ShippingStep"));
 const PaymentStep = lazy(() => import("./steps/PaymentStep"));
+const OrderSuccess = lazy(() => import("./OrderSuccess"));
 
 const steps = ["Cart", "Shipping", "Payment"];
 
 export default function CheckoutPage() {
-  const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { cart, clearCart } = useCart();
   const { user, setAlert } = useAuth();
   const [createOrder] = useMutation(CREATE_ORDER);
@@ -32,26 +44,50 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
-  const nextStep = () =>
+  const nextStep = () => {
+    // Basic validation before moving from Shipping -> Payment
+    if (activeStep === 1) {
+      const required = ["name", "phone", "address"];
+      for (const k of required) {
+        if (!String(shippingInfo[k] || "").trim()) {
+          setValidationError("Please fill in your name, phone and address.");
+          return;
+        }
+      }
+    }
+    setValidationError("");
     setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setActiveStep((prev) => Math.max(prev - 1, 0));
+  };
+  const prevStep = () => {
+    setValidationError("");
+    setActiveStep((prev) => Math.max(prev - 1, 0));
+  };
 
   const handlePayNow = async () => {
     if (!user) {
-      setAlert(true, "error", {
+      setAlert?.(true, "error", {
         messageEn: "Please login first",
         messageKh: "",
       });
-      router.push("/auth");
       return;
     }
 
+    if (!cart || cart.length === 0) {
+      setAlert?.(true, "error", {
+        messageEn: "Your cart is empty",
+        messageKh: "",
+      });
+      return;
+    }
+
+    setValidationError("");
     const orderInput = {
       userId: user.id,
       shippingInfo,
       items: cart.map((item) => ({
-        productId: item.product.id,
+        productId: item.product.id || item.product._id,
         quantity: item.quantity,
       })),
       paymentMethod,
@@ -61,16 +97,21 @@ export default function CheckoutPage() {
       setLoading(true);
       const { data } = await createOrder({ variables: { input: orderInput } });
       if (data?.createOrder?.isSuccess) {
-        setAlert(true, "success", {
+        setAlert?.(true, "success", {
           messageEn: "Order placed successfully!",
           messageKh: "",
         });
         clearCart();
         setShowSuccess(true);
+      } else {
+        setAlert?.(true, "error", {
+          messageEn: data?.createOrder?.message || "Checkout failed.",
+          messageKh: "",
+        });
       }
     } catch (err) {
       console.error(err);
-      setAlert(true, "error", {
+      setAlert?.(true, "error", {
         messageEn: "Checkout failed.",
         messageKh: "",
       });
@@ -105,55 +146,90 @@ export default function CheckoutPage() {
   };
 
   return (
-    <Box
-      sx={{
-        p: { xs: 2, sm: 3, md: 4 },
-        maxWidth: "lg",
-        mx: "auto",
-        minHeight: "60vh",
-      }}
-    >
-      {/* Breadcrumb */}
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1000, mx: "auto" }}>
       <CheckoutBreadcrumb activeStep={activeStep} />
 
-      {/* Step content or Success page */}
-      <Suspense
-        fallback={
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-            <CircularProgress />
-          </Box>
-        }
+      <Paper
+        elevation={1}
+        sx={{
+          p: { xs: 2, sm: 3 },
+          borderRadius: 2,
+        }}
       >
-        {showSuccess ? <OrderSuccess /> : renderStep()}
-      </Suspense>
-
-      {/* Navigation buttons (hide if success) */}
-      {!showSuccess && (
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          mt={3}
-          justifyContent="flex-end"
-        >
-          <Button
-            disabled={activeStep === 0}
-            onClick={prevStep}
-            fullWidth={{ xs: true, sm: false }}
+        {!showSuccess && (
+          <Stepper
+            activeStep={activeStep}
+            alternativeLabel={!isMobile}
+            orientation={isMobile ? "vertical" : "horizontal"}
+            sx={{ mb: { xs: 2, md: 3 } }}
           >
-            Back
-          </Button>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        )}
 
-          {activeStep < steps.length - 1 && (
-            <Button
-              variant="contained"
-              onClick={nextStep}
-              fullWidth={{ xs: true, sm: false }}
-            >
-              Next
-            </Button>
-          )}
-        </Stack>
-      )}
+        <Suspense
+          fallback={
+            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+              <CircularProgress />
+            </Box>
+          }
+        >
+          <Fade in>
+            <Box minHeight="320px">{showSuccess ? <OrderSuccess /> : renderStep()}</Box>
+          </Fade>
+        </Suspense>
+
+        {/* validation message */}
+        {validationError && (
+          <Box sx={{ color: "error.main", mt: 2 }}>{validationError}</Box>
+        )}
+
+        {/* Navigation buttons */}
+        {!showSuccess && (
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            mt={3}
+            justifyContent="space-between"
+          >
+            <Box>
+              <Button
+                variant="outlined"
+                onClick={prevStep}
+                disabled={activeStep === 0}
+                size="medium"
+              >
+                Back
+              </Button>
+            </Box>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {activeStep < steps.length - 1 ? (
+                <Button variant="contained" onClick={nextStep} size="medium">
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handlePayNow}
+                  disabled={loading}
+                  size="medium"
+                >
+                  {loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Pay Now"
+                  )}
+                </Button>
+              )}
+            </Box>
+          </Stack>
+        )}
+      </Paper>
     </Box>
   );
 }
