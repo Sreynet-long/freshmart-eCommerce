@@ -57,9 +57,10 @@ export default function Footer() {
                     width={48}
                     height={48}
                     style={{
-                      width: 48,
-                      height: 48,
-                      maxWidth: "100%",
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: 48,
+                      maxHeight: 48,
                       objectFit: "contain",
                     }}
                   />
@@ -80,25 +81,27 @@ export default function Footer() {
                     width={24}
                     height={24}
                     style={{
-                      width: 24,
-                      height: 24,
-                      maxWidth: "100%",
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: 24,
+                      maxHeight: 24,
                       objectFit: "contain",
                     }}
                   />
+
                   <Image
                     src="/payments/card.png"
                     alt="Mastercard"
                     width={24}
                     height={24}
                     style={{
-                      width: 24,
-                      height: 24,
-                      maxWidth: "100%",
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: 24,
+                      maxHeight: 24,
                       objectFit: "contain",
                     }}
                   />
-
                 </Box>
               </Stack>
             </Grid>
