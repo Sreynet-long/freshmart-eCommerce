@@ -179,7 +179,7 @@ export default function TopNavbar({ onSearch }) {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <SearchIcon sx={{ color: "green", cursor: "pointer" }} />
+                <SearchIcon sx={{ color: "green", cursor: "pointer", fontSize: 20 }} />
               </InputAdornment>
             ),
           }}
