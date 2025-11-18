@@ -50,14 +50,19 @@ function FeatureStore() {
           alignItems="center"
           sx={{ mb: 4 }}
         > */}
-          <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: 22 ,mb: 2,
-            textAlign: { xs: "center", md: "left" }
-            }}
-          >
-            Delivery & Pickup 🚛
-          </Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            fontSize: 22,
+            mb: 2,
+            textAlign: { xs: "center", md: "left" },
+          }}
+        >
+          Delivery & Pickup 🚛
+        </Typography>
 
-          {/* <Link href="/" style={{ textDecoration: "none" }}>
+        {/* <Link href="/" style={{ textDecoration: "none" }}>
             <Stack direction="row" alignItems="center" spacing={0.5}>
               <Typography
                 variant="body2"
