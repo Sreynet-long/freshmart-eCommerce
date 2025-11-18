@@ -56,7 +56,14 @@ export default function Footer() {
                     alt="FreshMart Logo"
                     width={48}
                     height={48}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      maxWidth: "100%",
+                      objectFit: "contain",
+                    }}
                   />
+
                   <Typography variant="h6">FreshMart</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary">
@@ -72,13 +79,26 @@ export default function Footer() {
                     alt="Visa"
                     width={24}
                     height={24}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      maxWidth: "100%",
+                      objectFit: "contain",
+                    }}
                   />
                   <Image
                     src="/payments/card.png"
                     alt="Mastercard"
                     width={24}
                     height={24}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      maxWidth: "100%",
+                      objectFit: "contain",
+                    }}
                   />
+
                 </Box>
               </Stack>
             </Grid>
