@@ -150,7 +150,7 @@ export default function CategoryPageClient({ slug }) {
                   alt={product.productName}
                   sx={{
                     objectFit: "contain",
-                    backgroundColor: "#fafafa",
+                    // backgroundColor: "#fafafa",
                     p: 1,
                   }}
                 />
