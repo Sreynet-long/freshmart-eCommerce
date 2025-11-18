@@ -43,6 +43,7 @@ export default function CheckoutPage() {
         messageEn: "Please login first",
         messageKh: "",
       });
+      router.push("/auth");
       return;
     }
 
@@ -104,25 +105,52 @@ export default function CheckoutPage() {
   };
 
   return (
-    <Box sx={{ p: 4, maxWidth: "lg", mx: "auto" }}>
+    <Box
+      sx={{
+        p: { xs: 2, sm: 3, md: 4 },
+        maxWidth: "lg",
+        mx: "auto",
+        minHeight: "60vh",
+      }}
+    >
       {/* Breadcrumb */}
       <CheckoutBreadcrumb activeStep={activeStep} />
 
       {/* Step content or Success page */}
-      <Suspense fallback={<CircularProgress />}>
+      <Suspense
+        fallback={
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        }
+      >
         {showSuccess ? <OrderSuccess /> : renderStep()}
       </Suspense>
 
       {/* Navigation buttons (hide if success) */}
       {!showSuccess && (
-        <Stack direction="row" spacing={2} mt={3}>
-          <Button disabled={activeStep === 0} onClick={prevStep}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          mt={3}
+          justifyContent="flex-end"
+        >
+          <Button
+            disabled={activeStep === 0}
+            onClick={prevStep}
+            fullWidth={{ xs: true, sm: false }}
+          >
             Back
           </Button>
+
           {activeStep < steps.length - 1 && (
-          <Button variant="contained" onClick={nextStep}>
-            Next
-          </Button>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              fullWidth={{ xs: true, sm: false }}
+            >
+              Next
+            </Button>
           )}
         </Stack>
       )}
