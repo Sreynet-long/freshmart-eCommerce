@@ -44,12 +44,12 @@ function FeatureStore() {
     <Box sx={{ py: 3, px: { xs: 2, sm: 4 }, bgcolor: "background.paper" }}>
       <Stack sx={{ maxWidth: "1200px", mx: "auto" }}>
         {/* Header */}
-        <Stack
+        {/* <Stack
           direction="row"
           justifyContent="space-between"
           alignItems="center"
           sx={{ mb: 4 }}
-        >
+        > */}
           <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: 22 ,mb: 2,
             textAlign: { xs: "center", md: "left" }
             }}
@@ -68,7 +68,7 @@ function FeatureStore() {
               <ArrowRight size="18" color="#7b1fa2" />
             </Stack>
           </Link> */}
-        </Stack>
+        {/* </Stack> */}
 
         {/* Store Cards */}
         <Grid container spacing={3} justifyContent="center" gap={8}>
