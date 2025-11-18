@@ -50,7 +50,10 @@ function FeatureStore() {
           alignItems="center"
           sx={{ mb: 4 }}
         >
-          <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: 22 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: 22 ,mb: 2,
+            textAlign: { xs: "center", md: "left" }
+            }}
+          >
             Delivery & Pickup 🚛
           </Typography>
 
