@@ -22,7 +22,7 @@ const AddToCart = forwardRef(({ searchKeyword }, ref) => {
   const { loading, error, data } = useQuery(GET_PRODUCT_WITH_PAGINATION, {
     variables: {
       page: 1,
-      limit: 24,
+      limit: 18,
       pagination: true,
       keyword: searchKeyword,
       category: null,

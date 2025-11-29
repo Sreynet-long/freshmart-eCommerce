@@ -1,13 +1,14 @@
 import { gql } from "@apollo/client";
 
 export const GET_PRODUCT_WITH_PAGINATION = gql`
-  query GetProductWithPagination($page: Int, $limit: Int, $pagination: Boolean, $keyword: String, $category: Category) {
-  getProductWithPagination(page: $page, limit: $limit, pagination: $pagination, keyword: $keyword, category: $category) {
+query GetProductWithPagination($page: Int, $limit: Int, $pagination: Boolean, $category: Category, $keyword: String) {
+  getProductWithPagination(page: $page, limit: $limit, pagination: $pagination, category: $category, keyword: $keyword) {
     data {
       id
       productName
       category
       imageUrl
+      imagePublicId
       desc
       price
       averageRating
