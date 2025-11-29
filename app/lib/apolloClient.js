@@ -6,7 +6,7 @@ export function createApolloClient(){
     return new ApolloClient({
         link: new HttpLink({
             // uri: " http://localhost:6380/graphql",
-            uri: "https://freshmart-backend-b73r.onrender.com",
+            uri: "https://freshmart-backend-b73r.onrender.com/graphql",
             fetch
         }),
         cache: new InMemoryCache()
