@@ -127,7 +127,7 @@ export const GET_ORDER_BY_USER = gql`
         }
         quantity
         price
-      }
+      } 
       totalPrice
       status
       paymentMethod
@@ -167,4 +167,42 @@ export const CANCEL_ORDER = gql`
       createdAt
     }
   }
+`;
+
+export const HIDE_ORDER = gql`
+mutation HideOrder($orderId: ID!) {
+  hideOrder(orderId: $orderId) {
+    id
+    userId
+    shippingInfo {
+      name
+      phone
+      email
+      address
+      country
+    }
+    items {
+      product {
+        id
+        productName
+        category
+        imageUrl
+        imagePublicId
+        desc
+        price
+        averageRating
+        reviewsCount
+      }
+      quantity
+      price
+    }
+    totalPrice
+    status
+    paymentMethod
+    paymentProof
+    createdAt
+    isHidden
+    isDeleted
+  }
+}
 `;
