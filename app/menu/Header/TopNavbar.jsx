@@ -56,22 +56,46 @@ export default function TopNavbar({ onSearch }) {
   const [options, setOptions] = useState([]);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  // Debounced search
-  const debouncedSearch = useMemo(
-    () =>
-      debounce((query) => {
-        if (onSearch && typeof onSearch === "function") {
-          onSearch(query, selectedCategory);
-        }
-      }, 500),
-    [onSearch, selectedCategory]
-  );
 
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setSearchText(value);
-    debouncedSearch(value);
-  };
+// Add this handler
+const handleSearchSubmit = () => {
+  if (searchText.trim()) {
+    router.push(
+      `/search?query=${encodeURIComponent(searchText)}&category=${encodeURIComponent(selectedCategory)}`
+    );
+  }
+};
+
+// Example: fetch autocomplete suggestions (GraphQL or REST)
+useEffect(() => {
+  if (searchText.length > 1) {
+    // Replace with your backend call
+    fetch(`/api/products/suggestions?query=${searchText}&category=${selectedCategory}`)
+      .then(res => res.json())
+      .then(data => {
+        setOptions(data.map(p => ({ label: p.name, imageUrl: p.imageUrl })));
+      });
+  }
+}, [searchText, selectedCategory]);
+
+const handleChange = (e) => {
+  const value = e.target.value;
+  setSearchText(value);
+  debouncedSearch(value);
+};
+
+const debouncedSearch = useMemo(
+  () =>
+    debounce((query) => {
+      // You can either call your backend suggestions here
+      // or just update state
+      if (onSearch && typeof onSearch === "function") {
+        onSearch(query, selectedCategory);
+      }
+    }, 500),
+  [onSearch, selectedCategory]
+);
+
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -432,11 +456,11 @@ export default function TopNavbar({ onSearch }) {
             },
           }}
         >
-          {/* <IconButton onClick={() => setMobileSearchOpen(false)}>
+          <IconButton onClick={() => setMobileSearchOpen(false)}>
             <MenuIcon />
-          </IconButton> */}
+          </IconButton>
 
-          {/* <TextField
+          <TextField
             select
             size="small"
             value={selectedCategory}
@@ -448,23 +472,30 @@ export default function TopNavbar({ onSearch }) {
                 {cat}
               </MenuItem>
             ))}
-          </TextField> */}
+          </TextField>
 
+         {/* Desktop Autocomplete */}
           <Autocomplete
             freeSolo
             options={options}
+            getOptionLabel={(option) => option.label || ""}
             inputValue={searchText}
-            onInputChange={(event, newValue) => {
-              setSearchText(newValue);
-              debouncedSearch(newValue);
-            }}
+            onInputChange={(event, newValue) => setSearchText(newValue)}
             sx={{ flex: 1 }}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} sx={{ display: "flex", alignItems: "center" }}>
+                <img src={option.imageUrl} alt={option.label} width={40} height={40} style={{ marginRight: 8 }} />
+                {option.label}
+              </Box>
+            )}
             renderInput={(params) => (
               <TextField
                 {...params}
                 placeholder="Search products..."
                 size="small"
-                fullWidth
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearchSubmit();
+                }}
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
@@ -481,7 +512,7 @@ export default function TopNavbar({ onSearch }) {
             variant="contained"
             sx={{ bgcolor: "green" }}
             onClick={() => {
-              debouncedSearch(searchText);
+              handleSearchSubmit();
               setMobileSearchOpen(false);
             }}
           >

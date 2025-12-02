@@ -88,3 +88,19 @@ export const DELETE_PRODUCT = gql`
     }
   }
 `;
+
+export const SEARCH_PRODUCT = gql`
+query SearchProducts($query: String!, $category: String, $limit: Int, $page: Int) {
+  searchProducts(query: $query, category: $category, limit: $limit, page: $page) {
+    id
+    productName
+    category
+    imageUrl
+    imagePublicId
+    desc
+    price
+    averageRating
+    reviewsCount
+  }
+}
+`;
