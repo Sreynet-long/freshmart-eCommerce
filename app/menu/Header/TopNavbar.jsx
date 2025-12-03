@@ -82,9 +82,8 @@ export default function TopNavbar({ onSearch }) {
   useEffect(() => {
     if (searchText.length > 1) {
       // Replace with your backend call
-      fetch(
-        `/api/products/suggestions?query=${searchText}&category=${selectedCategory}`
-      )
+      fetch(`/api/products/suggestions?query=${searchText}&category=${selectedCategory}`)
+
         .then((res) => res.json())
         .then((data) => {
           setOptions(
