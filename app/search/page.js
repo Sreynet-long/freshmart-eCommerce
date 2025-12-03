@@ -1,10 +1,9 @@
-import { Suspense } from "react";
-import ClientWrapper from "./ClientWrapper";
+"use client"
+
+import SearchResults from "./SearchResults";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading search ...</div>}>
-      <ClientWrapper />
-    </Suspense>
+    <SearchResults/>
   );
 }
