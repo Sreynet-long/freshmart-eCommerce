@@ -8,11 +8,9 @@ export async function GET(req) {
 
   // TODO: Replace with real DB / GraphQL call
   const suggestions = [
-    { id: 1, name: "Vitamin C", category: "Health" },
-    { id: 2, name: "Vinegar", category: "Cooking" },
-  ].filter(item =>
-    item.name.toLowerCase().includes(query.toLowerCase())
-  );
+    { id: 1, name: "Cabbage", category: "Vegetable" },
+    { id: 2, name: "Strawberry", category: "Fruit" },
+  ].filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
 
   return NextResponse.json(suggestions);
 }
