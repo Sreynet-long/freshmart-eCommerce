@@ -46,16 +46,15 @@ import LoginModal from "@/app/components/auth/LoginModal";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-  const DesktopSearch = dynamic(
-    () => import("@/app/components/search/DesktopSearch"),
-    { ssr: false }
-  );
+const DesktopSearch = dynamic(
+  () => import("@/app/components/search/DesktopSearch"),
+  { ssr: false }
+);
 
-  const MobileSearch = dynamic(
-    () => import("@/app/components/search/MobileSearch"),
-    { ssr: false }
-  );
-
+const MobileSearch = dynamic(
+  () => import("@/app/components/search/MobileSearch"),
+  { ssr: false }
+);
 
 export default function TopNavbar({ onSearch }) {
   const router = useRouter();
@@ -68,46 +67,54 @@ export default function TopNavbar({ onSearch }) {
   const [options, setOptions] = useState([]);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
+  // Add this handler
+  const handleSearchSubmit = () => {
+    if (searchText.trim()) {
+      router.push(
+        `/search?query=${encodeURIComponent(
+          searchText
+        )}&category=${encodeURIComponent(selectedCategory)}`
+      );
+    }
+  };
 
-// Add this handler
-const handleSearchSubmit = () => {
-  if (searchText.trim()) {
-    router.push(
-      `/search?query=${encodeURIComponent(searchText)}&category=${encodeURIComponent(selectedCategory)}`
-    );
-  }
-};
+  // Example: fetch autocomplete suggestions (GraphQL or REST)
+  useEffect(() => {
+    if (searchText.length > 1) {
+      // Replace with your backend call
+      fetch(
+        `/api/products/suggestions?query=${searchText}&category=${selectedCategory}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setOptions(
+            data.map((p) => ({
+              label: p.name,
+              imageUrl: p.imageUrl || "/placeholder.png",
+            }))
+          );
+        })
+        .catch((err) => console.error("Error fetching suggestions:", err));
+    }
+  }, [searchText, selectedCategory]);
 
-// Example: fetch autocomplete suggestions (GraphQL or REST)
-useEffect(() => {
-  if (searchText.length > 1) {
-    // Replace with your backend call
-    fetch(`/api/products/suggestions?query=${searchText}&category=${selectedCategory}`)
-      .then(res => res.json())
-      .then(data => {
-        setOptions(data.map(p => ({ label: p.name, imageUrl: p.imageUrl })));
-      });
-  }
-}, [searchText, selectedCategory]);
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
 
-const handleChange = (e) => {
-  const value = e.target.value;
-  setSearchText(value);
-  debouncedSearch(value);
-};
-
-const debouncedSearch = useMemo(
-  () =>
-    debounce((query) => {
-      // You can either call your backend suggestions here
-      // or just update state
-      if (onSearch && typeof onSearch === "function") {
-        onSearch(query, selectedCategory);
-      }
-    }, 500),
-  [onSearch, selectedCategory]
-);
-
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query) => {
+        // You can either call your backend suggestions here
+        // or just update state
+        if (onSearch && typeof onSearch === "function") {
+          onSearch(query, selectedCategory);
+        }
+      }, 500),
+    [onSearch, selectedCategory]
+  );
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -215,7 +222,9 @@ const debouncedSearch = useMemo(
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <SearchIcon sx={{ color: "green", cursor: "pointer", fontSize: 20 }} />
+                <SearchIcon
+                  sx={{ color: "green", cursor: "pointer", fontSize: 20 }}
+                />
               </InputAdornment>
             ),
           }}
@@ -453,7 +462,7 @@ const debouncedSearch = useMemo(
             <MenuIcon />
           </IconButton>
 
-          <TextField
+          {/* <TextField
             select
             size="small"
             value={selectedCategory}
@@ -465,9 +474,9 @@ const debouncedSearch = useMemo(
                 {cat}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
 
-         {/* Desktop */}
+          {/* Desktop */}
           <MobileSearch
             options={options}
             searchText={searchText}
