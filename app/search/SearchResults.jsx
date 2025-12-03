@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 
 export default function SearchResults() {
@@ -29,7 +29,7 @@ export default function SearchResults() {
   const variables = useMemo(() => ({
     query,
     category,
-    sortBy,
+    sortBy, 
     minPrice: priceRange[0],
     maxPrice: priceRange[1],
     limit: 20,
@@ -45,6 +45,15 @@ export default function SearchResults() {
       setPage(1);
     },
   });
+    useEffect(() => {
+    setPage(1);
+    setProducts([]);
+    refetch({
+      ...variables,
+      page: 1,
+    });
+  }, [query, category]);
+
 
   const loadMore = async () => {
     const nextPage = page + 1;
@@ -80,9 +89,16 @@ export default function SearchResults() {
       <Slider
         value={priceRange}
         onChange={(e, val) => setPriceRange(val)}
-        onChangeCommitted={() => {
-          setPage(1); setProducts([]);
-          refetch({ ...variables, minPrice: priceRange[0], maxPrice: priceRange[1], page: 1 });
+        onChangeCommitted={(e, val) => {
+          const [min, max] = val;
+          setPage(1);
+          setProducts([]);
+          refetch({
+            ...variables,
+            minPrice: min,
+            maxPrice: max,
+            page: 1,
+          });
         }}
         valueLabelDisplay="auto"
         min={0}

@@ -44,6 +44,18 @@ import debounce from "lodash.debounce";
 import SignupModal from "@/app/components/auth/SignupModal";
 import LoginModal from "@/app/components/auth/LoginModal";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+  const DesktopSearch = dynamic(
+    () => import("@/app/components/search/DesktopSearch"),
+    { ssr: false }
+  );
+
+  const MobileSearch = dynamic(
+    () => import("@/app/components/search/MobileSearch"),
+    { ssr: false }
+  );
+
 
 export default function TopNavbar({ onSearch }) {
   const router = useRouter();
@@ -359,30 +371,11 @@ const debouncedSearch = useMemo(
                 )}
               </TextField> */}
 
-              <Autocomplete
-                freeSolo
+              <DesktopSearch
                 options={options}
-                inputValue={searchText}
-                onInputChange={(event, newValue) => {
-                  setSearchText(newValue);
-                  debouncedSearch(newValue);
-                }}
-                sx={{ flex: 1 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Search products..."
-                    size="small"
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon sx={{ color: "green" }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
+                searchText={searchText}
+                setSearchText={setSearchText}
+                debouncedSearch={debouncedSearch}
               />
             </Box>
 
@@ -474,38 +467,12 @@ const debouncedSearch = useMemo(
             ))}
           </TextField>
 
-         {/* Desktop Autocomplete */}
-          <Autocomplete
-            freeSolo
+         {/* Desktop */}
+          <MobileSearch
             options={options}
-            getOptionLabel={(option) => option.label || ""}
-            inputValue={searchText}
-            onInputChange={(event, newValue) => setSearchText(newValue)}
-            sx={{ flex: 1 }}
-            renderOption={(props, option) => (
-              <Box component="li" {...props} sx={{ display: "flex", alignItems: "center" }}>
-                <img src={option.imageUrl} alt={option.label} width={40} height={40} style={{ marginRight: 8 }} />
-                {option.label}
-              </Box>
-            )}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="Search products..."
-                size="small"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearchSubmit();
-                }}
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: "green" }} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            debouncedSearch={debouncedSearch}
           />
 
           <Button
