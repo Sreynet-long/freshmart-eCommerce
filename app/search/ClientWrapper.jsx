@@ -1,6 +1,6 @@
 "use client";
 
-import SearchResults from "./SearchResults";
+import SearchResults from "../components/SearchResults";
 
 export default function ClientWrapper() {
   return <SearchResults />;

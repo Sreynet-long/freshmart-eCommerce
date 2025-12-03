@@ -1,22 +1,10 @@
-"use client";
-
-export const dynamic = "force-dynamic";
-
-
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-
-function SearchContent() {
-  const params = useSearchParams();
-  const query = params.get("query") || "";
-
-  return <div>Searching for: {query}</div>;
-}
+import SearchResults from "../components/SearchResults";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading search...</div>}>
-      <SearchContent />
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchResults />
     </Suspense>
   );
 }
